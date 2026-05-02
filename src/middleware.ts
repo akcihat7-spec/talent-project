@@ -2,14 +2,10 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
-  // Ana sayfa (/) herkese açık - hiçbir kontrol yapma
-  if (req.nextUrl.pathname === '/') {
-    return NextResponse.next()
-  }
-
   // Sadece belirli path'lerde authentication kontrolü yap
   const protectedPaths = ['/dashboard']
   const authPaths = ['/login', '/signup']
+  const publicPaths = ['/']
   
   // Eğer protected bir path'e erişmeye çalışıyorsa ve environment variables yoksa,
   // doğrudan geçiştir (Vercel'de hata vermemesi için)
@@ -48,14 +44,20 @@ export async function middleware(req: NextRequest) {
       data: { session },
     } = await supabase.auth.getSession()
 
-    // Dashboard protection
+    // Dashboard protection - giriş yapmamışsa login'e yönlendir
     if (protectedPaths.some(path => req.nextUrl.pathname.startsWith(path)) && !session) {
       const loginUrl = new URL('/login', req.url)
       return NextResponse.redirect(loginUrl)
     }
 
-    // Auth routes redirect
+    // Auth routes redirect - giriş yapmışsa dashboard'a yönlendir
     if (authPaths.some(path => req.nextUrl.pathname.startsWith(path)) && session) {
+      const dashboardUrl = new URL('/dashboard', req.url)
+      return NextResponse.redirect(dashboardUrl)
+    }
+
+    // Ana sayfa kontrolü - giriş yapmışsa dashboard'a yönlendir
+    if (publicPaths.some(path => req.nextUrl.pathname === path) && session) {
       const dashboardUrl = new URL('/dashboard', req.url)
       return NextResponse.redirect(dashboardUrl)
     }
@@ -69,5 +71,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/signup']
+  matcher: ['/dashboard/:path*', '/login', '/signup', '/']
 }
