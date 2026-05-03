@@ -15,18 +15,30 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardSidebar />
-      
-      <div className="lg:pl-64">
-        <DashboardHeader setSidebarOpen={setSidebarOpen} title={title} subtitle={subtitle} />
+      <div className="flex">
+        <div className="hidden lg:flex lg:flex-shrink-0">
+          <DashboardSidebar />
+        </div>
         
-        <main className="flex-1">
-          <div className="py-6">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              {children}
+        <div className="flex-1 lg:ml-0">
+          <DashboardHeader setSidebarOpen={setSidebarOpen} title={title} subtitle={subtitle} />
+          
+          <main className="flex-1">
+            <div className="py-6">
+              <div className="max-w-full px-4 sm:px-6 lg:px-8">
+                {children}
+              </div>
             </div>
-          </div>
-        </main>
+          </main>
+        </div>
+      </div>
+      
+      {/* Mobile sidebar overlay */}
+      <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+        <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-purple-900 to-violet-900">
+          <DashboardSidebar />
+        </div>
       </div>
     </div>
   )
