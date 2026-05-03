@@ -1,13 +1,11 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import { createClient } from '@supabase/supabase-js'
-import type { User, Session } from '@supabase/supabase-js'
-import type { Database } from '@/lib/supabase'
+import { useUser, useClerk } from '@clerk/nextjs'
 
 type AuthContextType = {
-  user: User | null
-  session: Session | null
+  user: any | null
+  session: any | null
   loading: boolean
   signOut: () => Promise<void>
   refreshUser: () => Promise<void>
@@ -16,50 +14,26 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [session, setSession] = useState<Session | null>(null)
+  const { user, isLoaded } = useUser()
+  const { signOut: clerkSignOut } = useClerk()
   const [loading, setLoading] = useState(true)
-  const supabase = createClient<Database>(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-)
 
   useEffect(() => {
-    // Get initial session
-    const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession()
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    }
-
-    getInitialSession()
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [supabase.auth])
+    setLoading(!isLoaded)
+  }, [isLoaded])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    await clerkSignOut()
   }
 
   const refreshUser = async () => {
-    const { data: { session } } = await supabase.auth.refreshSession()
-    setSession(session)
-    setUser(session?.user ?? null)
+    // Clerk otomatik olarak user'ı günceller
+    // Manuel refresh gerekmez
   }
 
   const value = {
     user,
-    session,
+    session: user, // Clerk'te session yerine user kullanılır
     loading,
     signOut,
     refreshUser,
