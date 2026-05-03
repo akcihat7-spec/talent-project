@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
-import { UserButton } from '@clerk/nextjs'
+import { UserButton, useClerk } from '@clerk/nextjs'
 import { 
   HomeIcon, 
   UserGroupIcon, 
@@ -41,9 +41,11 @@ interface DashboardSidebarProps {
   setSidebarOpen: (open: boolean) => void
 }
 
-export default function DashboardSidebar({ sidebarOpen, setSidebarOpen }: DashboardSidebarProps) {
+export default function DashboardSidebar() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
+  const { signOut } = useClerk()
 
   const handleNavigation = (href: string) => {
     router.push(href)
@@ -156,7 +158,10 @@ export default function DashboardSidebar({ sidebarOpen, setSidebarOpen }: Dashbo
                 <div className="ml-3">
                   <p className="text-sm font-medium text-white">Account</p>
                   <button
-                    onClick={() => router.push('/login')}
+                    onClick={() => {
+                      signOut()
+                      window.location.assign('/')
+                    }}
                     className="text-xs font-medium text-purple-200 hover:text-white"
                   >
                     Sign out

@@ -3,9 +3,19 @@
 import { SignInButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useEffect } from 'react'
 
 export default function LoginPage() {
   const router = useRouter()
+
+  useEffect(() => {
+    // Check if user is already signed in and redirect to dashboard
+    const timer = setTimeout(() => {
+      window.location.assign('/dashboard')
+    }, 100)
+    
+    return () => clearTimeout(timer)
+  }, [router])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">

@@ -15,7 +15,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <DashboardSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+      <DashboardSidebar />
       
       <div className="lg:pl-64">
         <DashboardHeader setSidebarOpen={setSidebarOpen} title={title} subtitle={subtitle} />

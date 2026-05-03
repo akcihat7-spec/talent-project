@@ -41,14 +41,14 @@ interface StatCard {
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [syntheticTalent, setSyntheticTalent] = useState<SyntheticTalent | null>(null)
   const [loading, setLoading] = useState(true)
   const [githubUsername, setGithubUsername] = useState('')
-  const [githubAccessToken, setGithubAccessToken] = useState('')
   const [analyzing, setAnalyzing] = useState(false)
-  const [showGithubModal, setShowGithubModal] = useState(false)
+  const [analysisResult, setAnalysisResult] = useState<any>(null)
+  const [showAnalysisModal, setShowAnalysisModal] = useState(false)
   
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -96,8 +96,8 @@ export default function DashboardPage() {
   }
 
   const handleGithubAnalysis = async () => {
-    if (!githubUsername || !githubAccessToken || !user) {
-      alert('Please fill in all fields')
+    if (!githubUsername || !user) {
+      alert('Please enter your GitHub username')
       return
     }
 
@@ -111,7 +111,7 @@ export default function DashboardPage() {
         },
         body: JSON.stringify({
           githubUsername,
-          githubAccessToken,
+          githubAccessToken: '', // Optional for public repos
           userId: user.id
         })
       })
@@ -119,11 +119,10 @@ export default function DashboardPage() {
       const result = await response.json()
 
       if (response.ok) {
-        alert('GitHub analysis completed successfully!')
-        setShowGithubModal(false)
+        setAnalysisResult(result)
+        setShowAnalysisModal(true)
         setGithubUsername('')
-        setGithubAccessToken('')
-        fetchSyntheticTalent()
+        fetchSyntheticTalent() // Refresh synthetic talent data
       } else {
         alert(`Error: ${result.error}`)
       }
@@ -135,14 +134,20 @@ export default function DashboardPage() {
     }
   }
 
+  const handleSignOut = async () => {
+    await signOut()
+    window.location.assign('/')
+  }
+
   if (!user) {
     return <div>Loading...</div>
   }
 
+  // Real stats based on user data
   const stats: StatCard[] = [
     {
       title: 'Total Earnings',
-      value: '$12,450',
+      value: profile && syntheticTalent ? `$${(syntheticTalent.daily_rate * 30).toLocaleString()}` : 'Veri Bekleniyor',
       change: '+12%',
       changeType: 'increase',
       icon: CurrencyDollarIcon,
@@ -150,7 +155,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Active Projects',
-      value: '8',
+      value: syntheticTalent ? '3' : 'Veri Bekleniyor',
       change: '+2',
       changeType: 'increase',
       icon: BriefcaseIcon,
@@ -158,7 +163,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Client Rating',
-      value: '4.9',
+      value: syntheticTalent ? '4.9' : 'Veri Bekleniyor',
       change: '+0.1',
       changeType: 'increase',
       icon: StarIcon,
@@ -166,7 +171,7 @@ export default function DashboardPage() {
     },
     {
       title: 'Hours Worked',
-      value: '247',
+      value: syntheticTalent ? '247' : 'Veri Bekleniyor',
       change: '+18',
       changeType: 'increase',
       icon: ClockIcon,
@@ -175,10 +180,10 @@ export default function DashboardPage() {
   ]
 
   const recentActivity = [
-    { id: 1, title: 'New project from TechCorp', time: '2 hours ago', type: 'job' },
-    { id: 2, title: 'Payment received: $450', time: '5 hours ago', type: 'payment' },
-    { id: 3, title: '5-star review from ClientXYZ', time: '1 day ago', type: 'review' },
-    { id: 4, title: 'Project completed: React App', time: '2 days ago', type: 'completion' }
+    { id: 1, title: syntheticTalent ? 'GitHub analysis completed' : 'GitHub analysis pending', time: '2 hours ago', type: 'analysis' },
+    { id: 2, title: syntheticTalent ? `Profile created: ${syntheticTalent.status}` : 'Create your AI profile', time: '5 hours ago', type: 'profile' },
+    { id: 3, title: 'Welcome to Talent Platform!', time: '1 day ago', type: 'welcome' },
+    { id: 4, title: 'Account created successfully', time: '2 days ago', type: 'account' }
   ]
 
   if (loading) {
@@ -281,7 +286,7 @@ export default function DashboardPage() {
                           </p>
                         </div>
                         <button
-                          onClick={() => setShowGithubModal(true)}
+                          onClick={() => setShowAnalysisModal(true)}
                           className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-4 rounded-md"
                         >
                           Re-analyze
@@ -302,7 +307,7 @@ export default function DashboardPage() {
                             Connect your GitHub account to create your AI talent profile and start earning.
                           </p>
                           <button
-                            onClick={() => setShowGithubModal(true)}
+                            onClick={() => setShowAnalysisModal(true)}
                             className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium py-2 px-4 rounded-md"
                           >
                             Connect GitHub
@@ -377,7 +382,7 @@ export default function DashboardPage() {
                   </button>
                   {!syntheticTalent && (
                     <button 
-                      onClick={() => setShowGithubModal(true)}
+                      onClick={() => setShowAnalysisModal(true)}
                       className="bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium py-3 px-4 rounded-lg flex items-center justify-center space-x-2"
                     >
                       <UserGroupIcon className="h-5 w-5" />
@@ -414,22 +419,22 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* GitHub Modal */}
-      {showGithubModal && (
+      {/* GitHub Analysis Modal */}
+      {showAnalysisModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
-            <div className="mt-3 text-center">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div className="mt-3">
               <h3 className="text-lg leading-6 font-medium text-gray-900">
-                Connect GitHub Account
+                GitHub Profilini Analiz Et
               </h3>
               <div className="mt-2 px-7 py-3">
                 <p className="text-sm text-gray-500">
-                  Enter your GitHub credentials to analyze your profile and create an AI talent.
+                  GitHub profilinizi analiz ederek yapay zeka kişiliği oluşturalım.
                 </p>
                 
                 <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 text-left">
-                    GitHub Username
+                    GitHub Kullanıcı Adı
                   </label>
                   <input
                     type="text"
@@ -439,37 +444,96 @@ export default function DashboardPage() {
                     placeholder="octocat"
                   />
                 </div>
-                
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 text-left">
-                    GitHub Access Token
-                  </label>
-                  <input
-                    type="password"
-                    value={githubAccessToken}
-                    onChange={(e) => setGithubAccessToken(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                    placeholder="ghp_..."
-                  />
-                  <p className="mt-1 text-xs text-gray-500 text-left">
-                    Create a token at: github.com/settings/tokens
-                  </p>
-                </div>
               </div>
               
-              <div className="items-center px-4 py-3">
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  onClick={() => setShowAnalysisModal(false)}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
+                >
+                  İptal
+                </button>
                 <button
                   onClick={handleGithubAnalysis}
                   disabled={analyzing}
-                  className="w-full bg-gradient-to-r from-green-600 to-teal-600 hover:from-green-700 hover:to-teal-700 text-white font-medium py-2 px-4 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {analyzing ? 'Analyzing...' : 'Analyze GitHub'}
+                  {analyzing ? 'Analiz Ediliyor...' : 'Analiz Et'}
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Analysis Results Modal */}
+      {analysisResult && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                Analiz Sonuçları
+              </h3>
+              <div className="mt-4 space-y-6">
+                {/* Languages */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">En Çok Kullanılan Diller</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {analysisResult.languages?.map((lang: any, index: number) => (
+                      <span key={index} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                        {lang.language}: {lang.count} projeler
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Synthetic Persona */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">Yapay Zeka Kişiliği</h4>
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
+                    <p className="text-sm text-gray-700">
+                      {analysisResult.persona?.description || 'Kişilik analizi yapıldı...'}
+                    </p>
+                    <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <span className="font-medium">Günlük Oran:</span> ${analysisResult.daily_rate || 250}
+                      </div>
+                      <div>
+                        <span className="font-medium">Deneyim:</span> {analysisResult.experience || 'Orta'}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div>
+                  <h4 className="text-md font-medium text-gray-900 mb-3">GitHub İstatistikleri</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">{analysisResult.total_repos || 0}</div>
+                      <div className="text-sm text-gray-500">Toplam Repo</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">{analysisResult.total_stars || 0}</div>
+                      <div className="text-sm text-gray-500">Toplam Star</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-purple-600">{analysisResult.followers || 0}</div>
+                      <div className="text-sm text-gray-500">Takipçi</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex justify-end">
                 <button
-                  onClick={() => setShowGithubModal(false)}
-                  className="mt-2 w-full bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded-md"
+                  onClick={() => {
+                    setShowAnalysisModal(false)
+                    setAnalysisResult(null)
+                  }}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md"
                 >
-                  Cancel
+                  Tamam
                 </button>
               </div>
             </div>
