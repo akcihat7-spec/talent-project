@@ -367,13 +367,13 @@ export default function MarketplacePage() {
           <div className="flex-1">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
               </div>
               <input
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+                className="block w-full pl-10 pr-3 py-2 border border-gray-700 rounded-md leading-5 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Search talents..."
               />
             </div>
@@ -383,7 +383,7 @@ export default function MarketplacePage() {
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as 'rating' | 'price' | 'projects')}
-            className="block w-full px-3 py-2 border border-gray-300 rounded-md bg-white focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
+            className="block w-full px-3 py-2 border border-gray-700 rounded-md bg-gray-800 text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
           >
             <option value="rating">Sort by Rating</option>
             <option value="price">Sort by Price</option>
@@ -393,7 +393,7 @@ export default function MarketplacePage() {
           {/* Filter Toggle */}
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+            className="inline-flex items-center px-4 py-2 border border-gray-700 rounded-md shadow-sm text-sm font-medium text-gray-300 bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <FunnelIcon className="h-4 w-4 mr-2" />
             Filters
@@ -402,11 +402,11 @@ export default function MarketplacePage() {
 
         {/* Filters Panel */}
         {showFilters && (
-          <div className="mt-6 p-4 bg-white border border-gray-200 rounded-lg">
+          <div className="mt-6 p-4 bg-gray-900 border border-gray-800 rounded-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Skills Filter */}
               <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-3">Skills</h3>
+                <h3 className="text-sm font-medium text-white mb-3">Skills</h3>
                 <div className="flex flex-wrap gap-2">
                   {allSkills.map(skill => (
                     <button
@@ -418,10 +418,10 @@ export default function MarketplacePage() {
                             : [...prev, skill]
                         )
                       }}
-                      className={`px-3 py-1 text-xs font-medium rounded-full ${
+                      className={`px-3 py-1 text-sm rounded-full transition-colors ${
                         selectedSkills.includes(skill)
-                          ? 'bg-purple-600 text-white'
-                          : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                          ? 'bg-blue-600 text-white'
+                          : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                       }`}
                     >
                       {skill}
@@ -430,12 +430,14 @@ export default function MarketplacePage() {
                 </div>
               </div>
 
-              {/* Price Range */}
+              {/* Price Range Filter */}
               <div>
-                <h3 className="text-sm font-medium text-gray-900 mb-3">
-                  Price Range: ${priceRange[0]} - ${priceRange[1]}
-                </h3>
+                <h3 className="text-sm font-medium text-white mb-3">Price Range ($/day)</h3>
                 <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">${priceRange[0]}</span>
+                    <span className="text-sm text-gray-400">${priceRange[1]}</span>
+                  </div>
                   <input
                     type="range"
                     min="0"
@@ -444,10 +446,6 @@ export default function MarketplacePage() {
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
                     className="w-full"
                   />
-                  <div className="flex justify-between text-xs text-gray-500">
-                    <span>$0</span>
-                    <span>$500</span>
-                  </div>
                 </div>
               </div>
             </div>
@@ -460,7 +458,7 @@ export default function MarketplacePage() {
                   setPriceRange([0, 500])
                   setSearchTerm('')
                 }}
-                className="text-sm text-purple-600 hover:text-purple-800"
+                className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
               >
                 Clear all filters
               </button>
@@ -471,15 +469,15 @@ export default function MarketplacePage() {
 
       {/* Results Count */}
       <div className="mb-6">
-        <p className="text-sm text-gray-700">
-          Showing <span className="font-medium">{filteredTalents.length}</span> talents
+        <p className="text-sm text-gray-400">
+          Showing <span className="font-medium text-white">{filteredTalents.length}</span> talents
         </p>
       </div>
 
       {/* Talent Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTalents.map(talent => (
-          <div key={talent.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300">
+          <div key={talent.id} className="bg-gray-900 border border-gray-800 rounded-lg hover:border-gray-700 transition-colors duration-300">
             {/* Header */}
             <div className="p-6">
               <div className="flex items-start justify-between">
@@ -490,16 +488,16 @@ export default function MarketplacePage() {
                     </span>
                   </div>
                   <div>
-                    <h3 className="text-lg font-medium text-gray-900">{talent.name}</h3>
-                    <p className="text-sm text-gray-500">{talent.title}</p>
+                    <h3 className="text-lg font-medium text-white">{talent.name}</h3>
+                    <p className="text-sm text-gray-400">{talent.title}</p>
                   </div>
                 </div>
                 <button
                   onClick={() => toggleFavorite(talent.id)}
-                  className="text-gray-400 hover:text-red-500"
+                  className="text-gray-400 hover:text-red-400 transition-colors"
                 >
                   {favorites.includes(talent.id) ? (
-                    <HeartSolidIcon className="h-5 w-5 text-red-500" />
+                    <HeartSolidIcon className="h-5 w-5 text-red-400" />
                   ) : (
                     <HeartIcon className="h-5 w-5" />
                   )}
@@ -514,7 +512,7 @@ export default function MarketplacePage() {
               </div>
 
               {/* Description */}
-              <p className="mt-3 text-sm text-gray-600 line-clamp-2">
+              <p className="mt-3 text-sm text-gray-300 line-clamp-2">
                 {talent.description}
               </p>
 
@@ -522,12 +520,12 @@ export default function MarketplacePage() {
               <div className="mt-4">
                 <div className="flex flex-wrap gap-1">
                   {talent.expertise.slice(0, 3).map(skill => (
-                    <span key={skill} className="px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded-full">
+                    <span key={skill} className="px-2 py-1 text-xs bg-blue-900 text-blue-300 rounded-full">
                       {skill}
                     </span>
                   ))}
                   {talent.expertise.length > 3 && (
-                    <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">
+                    <span className="px-2 py-1 text-xs bg-gray-700 text-gray-300 rounded-full">
                       +{talent.expertise.length - 3} more
                     </span>
                   )}
@@ -539,28 +537,28 @@ export default function MarketplacePage() {
                 <div>
                   <div className="flex items-center justify-center">
                     <StarIcon className="h-4 w-4 text-yellow-400 mr-1" />
-                    <span className="text-sm font-medium text-gray-900">{talent.rating}</span>
+                    <span className="text-sm font-medium text-white">{talent.rating}</span>
                   </div>
-                  <p className="text-xs text-gray-500">Rating</p>
+                  <p className="text-xs text-gray-400">Rating</p>
                 </div>
                 <div>
                   <div className="flex items-center justify-center">
                     <BriefcaseIcon className="h-4 w-4 text-gray-400 mr-1" />
-                    <span className="text-sm font-medium text-gray-900">{talent.projects}</span>
+                    <span className="text-sm font-medium text-white">{talent.projects}</span>
                   </div>
-                  <p className="text-xs text-gray-500">Projects</p>
+                  <p className="text-xs text-gray-400">Projects</p>
                 </div>
                 <div>
                   <div className="flex items-center justify-center">
                     <CurrencyDollarIcon className="h-4 w-4 text-gray-400 mr-1" />
-                    <span className="text-sm font-medium text-gray-900">${talent.dailyRate}</span>
+                    <span className="text-sm font-medium text-white">${talent.dailyRate}</span>
                   </div>
-                  <p className="text-xs text-gray-500">Daily</p>
+                  <p className="text-xs text-gray-400">Daily</p>
                 </div>
               </div>
 
               {/* Additional Info */}
-              <div className="mt-4 space-y-2 text-xs text-gray-500">
+              <div className="mt-4 space-y-2 text-xs text-gray-400">
                 <div className="flex items-center">
                   <ClockIcon className="h-3 w-3 mr-1" />
                   Response time: {talent.responseTime}
@@ -575,11 +573,11 @@ export default function MarketplacePage() {
               <div className="mt-6 flex space-x-3">
                 <button 
                   onClick={() => handleHireNow(talent)}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md text-sm"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md text-sm transition-colors"
                 >
                   Hire Now
                 </button>
-                <button className="flex-1 border border-purple-600 text-purple-600 hover:bg-purple-50 font-medium py-2 px-4 rounded-md text-sm">
+                <button className="flex-1 border border-gray-700 text-gray-300 hover:bg-gray-800 font-medium py-2 px-4 rounded-md text-sm transition-colors">
                   View Profile
                 </button>
               </div>
@@ -591,9 +589,9 @@ export default function MarketplacePage() {
       {/* No Results */}
       {filteredTalents.length === 0 && (
         <div className="text-center py-12">
-          <UserGroupIcon className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No talents found</h3>
-          <p className="mt-1 text-sm text-gray-500">
+          <UserGroupIcon className="mx-auto h-12 w-12 text-gray-600" />
+          <h3 className="mt-2 text-sm font-medium text-white">No talents found</h3>
+          <p className="mt-1 text-sm text-gray-400">
             Try adjusting your search or filters
           </p>
         </div>
@@ -601,24 +599,24 @@ export default function MarketplacePage() {
 
       {/* AI Agent Modal */}
       {showAIAgentModal && selectedTalent && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-gray-900 border-gray-800">
             <div className="mt-3">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+              <h3 className="text-lg leading-6 font-medium text-white">
                 AI Agent İş Akışı Başlatılıyor
               </h3>
               <div className="mt-4">
-                <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+                <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
                   <div className="flex items-center mb-3">
-                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                    <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold">
                       {selectedTalent.name.charAt(0)}
                     </div>
                     <div className="ml-3">
-                      <h4 className="font-medium text-gray-900">{selectedTalent.name}</h4>
-                      <p className="text-sm text-gray-500">{selectedTalent.title}</p>
+                      <h4 className="font-medium text-white">{selectedTalent.name}</h4>
+                      <p className="text-sm text-gray-400">{selectedTalent.title}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-gray-700">
+                  <p className="text-sm text-gray-300">
                     AI Agent, {selectedTalent.name} yeteneklerini kullanarak GitHub reposundaki bir issue'yu çözmek için çalışacak.
                   </p>
                 </div>
@@ -626,21 +624,21 @@ export default function MarketplacePage() {
                 {/* AI Agent Status */}
                 <div className="mt-4 space-y-3">
                   {aiAgentStatus === 'analyzing' && (
-                    <div className="flex items-center text-blue-600">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                    <div className="flex items-center text-blue-400">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
                       <span className="text-sm">AI Agent analiz ediyor...</span>
                     </div>
                   )}
                   
                   {aiAgentStatus === 'working' && (
-                    <div className="flex items-center text-purple-600">
-                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 mr-2"></div>
+                    <div className="flex items-center text-blue-400">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-400 mr-2"></div>
                       <span className="text-sm">AI Agent issue çözüyor...</span>
                     </div>
                   )}
                   
                   {aiAgentStatus === 'completed' && (
-                    <div className="flex items-center text-green-600">
+                    <div className="flex items-center text-green-400">
                       <CheckCircleIcon className="h-4 w-4 mr-2" />
                       <span className="text-sm">Issue başarıyla çözüldü!</span>
                     </div>
@@ -649,8 +647,8 @@ export default function MarketplacePage() {
 
                 {/* GitHub Info */}
                 {selectedTalent.githubUsername && (
-                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">
+                  <div className="mt-4 p-3 bg-gray-800 border border-gray-700 rounded-lg">
+                    <p className="text-sm text-gray-300">
                       <span className="font-medium">GitHub:</span> {selectedTalent.githubUsername}
                     </p>
                   </div>
@@ -664,7 +662,7 @@ export default function MarketplacePage() {
                     setSelectedTalent(null)
                     setAiAgentStatus('idle')
                   }}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors"
                   disabled={aiAgentStatus === 'working'}
                 >
                   İptal
@@ -672,7 +670,7 @@ export default function MarketplacePage() {
                 <button
                   onClick={startAIAgentWorkflow}
                   disabled={aiAgentStatus !== 'analyzing'}
-                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {aiAgentStatus === 'analyzing' ? 'Başlatılıyor...' : 'AI Agent Başlat'}
                 </button>

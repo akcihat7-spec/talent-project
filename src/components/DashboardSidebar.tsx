@@ -38,10 +38,15 @@ export default function DashboardSidebar() {
   }
 
   return (
-    <div className="flex flex-col w-64 bg-gradient-to-b from-purple-900 to-violet-900 min-h-screen">
+    <div className="flex flex-col w-64 bg-gray-900 border-r border-gray-800 min-h-screen">
       <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
         <div className="flex items-center flex-shrink-0 px-4">
-          <h1 className="text-2xl font-bold text-white">TalentHub</h1>
+          <div className="flex items-center">
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+              <span className="text-gray-900 font-bold text-sm">TH</span>
+            </div>
+            <h1 className="ml-2 text-xl font-bold text-white">TalentHub</h1>
+          </div>
         </div>
         <nav className="mt-8 flex-1 px-3 space-y-1">
           {navigation.map((item) => {
@@ -52,12 +57,12 @@ export default function DashboardSidebar() {
                 onClick={() => handleNavigation(item.href)}
                 className={`${
                   isActive
-                    ? 'bg-purple-800 text-white'
-                    : 'text-purple-200 hover:bg-purple-700 hover:text-white'
-                } group flex items-center px-2 py-2 text-sm font-medium rounded-md`}
+                    ? 'bg-gray-800 text-white border-l-2 border-blue-500'
+                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+                } group flex items-center px-3 py-2 text-sm font-medium rounded-r-md w-full text-left transition-colors`}
               >
-                <item.icon className={`mr-3 h-6 w-6 ${
-                  isActive ? 'text-purple-200' : 'text-purple-400'
+                <item.icon className={`mr-3 h-5 w-5 ${
+                  isActive ? 'text-blue-400' : 'text-gray-500'
                 }`} aria-hidden="true" />
                 {item.name}
               </button>
@@ -65,7 +70,7 @@ export default function DashboardSidebar() {
           })}
         </nav>
       </div>
-      <div className="flex-shrink-0 flex border-t border-purple-800 p-4">
+      <div className="flex-shrink-0 flex border-t border-gray-800 p-4">
         <div className="flex items-center">
           <div className="flex-shrink-0">
             <UserButton />
@@ -77,7 +82,7 @@ export default function DashboardSidebar() {
                 signOut()
                 window.location.assign('/')
               }}
-              className="text-xs font-medium text-purple-200 hover:text-white"
+              className="text-xs font-medium text-gray-400 hover:text-white transition-colors"
             >
               Sign out
             </button>

@@ -201,7 +201,7 @@ export default function DashboardPage() {
       {/* Stats Grid */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.title} className="bg-white overflow-hidden shadow rounded-lg">
+          <div key={stat.title} className="bg-gray-900 border border-gray-800 rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -211,18 +211,18 @@ export default function DashboardPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">{stat.title}</dt>
+                    <dt className="text-sm font-medium text-gray-400 truncate">{stat.title}</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{stat.value}</div>
+                      <div className="text-2xl font-semibold text-white">{stat.value}</div>
                       {stat.change && (
                         <div
                           className={`ml-2 flex items-baseline text-sm font-semibold ${
-                            stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                            stat.changeType === 'increase' ? 'text-green-400' : 'text-red-400'
                           }`}
                         >
                           <ArrowTrendingUpIcon
                             className={`h-4 w-4 mr-1 ${
-                              stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                              stat.changeType === 'increase' ? 'text-green-400' : 'text-red-400'
                             }`}
                             aria-hidden="true"
                           />
@@ -242,9 +242,9 @@ export default function DashboardPage() {
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Profile Section */}
         <div className="lg:col-span-2">
-          <div className="bg-white shadow rounded-lg">
+          <div className="bg-gray-900 border border-gray-800 rounded-lg">
             <div className="px-4 py-5 sm:p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Profile Overview</h3>
+              <h3 className="text-lg font-medium text-white mb-4">Profile Overview</h3>
               
               {profile ? (
                 <div className="space-y-6">
@@ -270,16 +270,16 @@ export default function DashboardPage() {
                   </div>
 
                   {syntheticTalent && (
-                    <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
-                      <h4 className="text-md font-medium text-gray-900 mb-2">AI Talent Status</h4>
+                    <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                      <h4 className="text-md font-medium text-white mb-2">AI Talent Status</h4>
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-sm text-gray-600">Daily Rate: <span className="font-semibold">${syntheticTalent.daily_rate}</span></p>
-                          <p className="text-sm text-gray-600 mt-1">Status: 
+                          <p className="text-sm text-gray-300">Daily Rate: <span className="font-semibold text-white">${syntheticTalent.daily_rate}</span></p>
+                          <p className="text-sm text-gray-300 mt-1">Status: 
                             <span className={`ml-1 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                               syntheticTalent.status === 'active' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-yellow-100 text-yellow-800'
+                                ? 'bg-green-900 text-green-300' 
+                                : 'bg-yellow-900 text-yellow-300'
                             }`}>
                               {syntheticTalent.status === 'active' ? 'Active' : 'Pending'}
                             </span>
@@ -287,7 +287,7 @@ export default function DashboardPage() {
                         </div>
                         <button
                           onClick={() => setShowAnalysisModal(true)}
-                          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium py-2 px-4 rounded-md"
+                          className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors"
                         >
                           Re-analyze
                         </button>
@@ -296,19 +296,19 @@ export default function DashboardPage() {
                   )}
 
                   {!syntheticTalent && profile.role === 'talent' && (
-                    <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                    <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
                       <div className="flex items-center">
                         <div className="flex-shrink-0">
-                          <CheckCircleIcon className="h-5 w-5 text-yellow-600" />
+                          <CheckCircleIcon className="h-5 w-5 text-blue-400" />
                         </div>
                         <div className="ml-3">
-                          <h4 className="text-sm font-medium text-yellow-800">Create Your AI Talent</h4>
-                          <p className="mt-1 text-sm text-yellow-700">
+                          <h4 className="text-sm font-medium text-white">Create Your AI Talent</h4>
+                          <p className="mt-1 text-sm text-gray-300">
                             Connect your GitHub account to create your AI talent profile and start earning.
                           </p>
                           <button
                             onClick={() => setShowAnalysisModal(true)}
-                            className="mt-2 bg-yellow-600 hover:bg-yellow-700 text-white text-sm font-medium py-2 px-4 rounded-md"
+                            className="mt-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-2 px-4 rounded-md transition-colors"
                           >
                             Connect GitHub
                           </button>
@@ -421,42 +421,54 @@ export default function DashboardPage() {
 
       {/* GitHub Analysis Modal */}
       {showAnalysisModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-gray-900 border-gray-800">
             <div className="mt-3">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+              <h3 className="text-lg leading-6 font-medium text-white">
                 GitHub Profilini Analiz Et
               </h3>
-              <div className="mt-2 px-7 py-3">
-                <p className="text-sm text-gray-500">
-                  GitHub profilinizi analiz ederek yapay zeka kişiliği oluşturalım.
-                </p>
-                
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 text-left">
-                    GitHub Kullanıcı Adı
-                  </label>
-                  <input
-                    type="text"
-                    value={githubUsername}
-                    onChange={(e) => setGithubUsername(e.target.value)}
-                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
-                    placeholder="octocat"
-                  />
+              <div className="lg:col-span-1">
+                <div className="bg-gray-900 border border-gray-800 rounded-lg">
+                  <div className="px-4 py-5 sm:p-6">
+                    <h3 className="text-lg font-medium text-white mb-4">GitHub Analysis</h3>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <label htmlFor="github-username" className="block text-sm font-medium text-gray-300 mb-1">
+                          GitHub Username
+                        </label>
+                        <input
+                          type="text"
+                          id="github-username"
+                          value={githubUsername}
+                          onChange={(e) => setGithubUsername(e.target.value)}
+                          placeholder="Enter your GitHub username"
+                          className="w-full px-3 py-2 bg-gray-800 border border-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 placeholder-gray-500"
+                        />
+                      </div>
+                      
+                      <button
+                        onClick={handleGithubAnalysis}
+                        disabled={analyzing || !githubUsername}
+                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-400 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                      >
+                        {analyzing ? 'Analyzing...' : 'Analyze GitHub'}
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-              
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   onClick={() => setShowAnalysisModal(false)}
-                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
+                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white font-medium rounded-md transition-colors"
                 >
                   İptal
                 </button>
                 <button
                   onClick={handleGithubAnalysis}
                   disabled={analyzing}
-                  className="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {analyzing ? 'Analiz Ediliyor...' : 'Analiz Et'}
                 </button>
@@ -468,19 +480,19 @@ export default function DashboardPage() {
 
       {/* Analysis Results Modal */}
       {analysisResult && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-3xl shadow-lg rounded-md bg-gray-900 border-gray-800">
             <div className="mt-3">
-              <h3 className="text-lg leading-6 font-medium text-gray-900">
+              <h3 className="text-lg leading-6 font-medium text-white">
                 Analiz Sonuçları
               </h3>
               <div className="mt-4 space-y-6">
                 {/* Languages */}
                 <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-3">En Çok Kullanılan Diller</h4>
+                  <h4 className="text-md font-medium text-white mb-3">En Çok Kullanılan Diller</h4>
                   <div className="flex flex-wrap gap-2">
                     {analysisResult.languages?.map((lang: any, index: number) => (
-                      <span key={index} className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm">
+                      <span key={index} className="px-3 py-1 bg-blue-900 text-blue-300 rounded-full text-sm">
                         {lang.language}: {lang.count} projeler
                       </span>
                     ))}
@@ -489,9 +501,9 @@ export default function DashboardPage() {
 
                 {/* Synthetic Persona */}
                 <div>
-                  <h4 className="text-md font-medium text-gray-900 mb-3">Yapay Zeka Kişiliği</h4>
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg">
-                    <p className="text-sm text-gray-700">
+                  <h4 className="text-md font-medium text-white mb-3">Yapay Zeka Kişiliği</h4>
+                  <div className="bg-gray-800 border border-gray-700 p-4 rounded-lg">
+                    <p className="text-sm text-gray-300">
                       {analysisResult.persona?.description || 'Kişilik analizi yapıldı...'}
                     </p>
                     <div className="mt-3 grid grid-cols-2 gap-4 text-sm">
