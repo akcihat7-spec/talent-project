@@ -49,6 +49,7 @@ export default function DashboardPage() {
   const [analyzing, setAnalyzing] = useState(false)
   const [analysisResult, setAnalysisResult] = useState<any>(null)
   const [showAnalysisModal, setShowAnalysisModal] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -65,43 +66,55 @@ export default function DashboardPage() {
   const fetchProfile = async () => {
     if (!user) return
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
 
-    if (error) {
-      console.error('Error fetching profile:', error)
-    } else {
-      setProfile(data)
+      if (error) {
+        console.error('Error fetching profile:', error)
+        setError('Failed to load profile data')
+      } else {
+        setProfile(data)
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching profile:', err)
+      setError('An unexpected error occurred while loading profile')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const fetchSyntheticTalent = async () => {
     if (!user) return
 
-    const { data, error } = await supabase
-      .from('synthetic_talents')
-      .select('*')
-      .eq('owner_id', user.id)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('synthetic_talents')
+        .select('*')
+        .eq('owner_id', user.id)
+        .single()
 
-    if (error && error.code !== 'PGRST116') {
-      console.error('Error fetching synthetic talent:', error)
-    } else {
-      setSyntheticTalent(data)
+      if (error) {
+        console.error('Error fetching synthetic talent:', error)
+      } else {
+        setSyntheticTalent(data)
+      }
+    } catch (err) {
+      console.error('Unexpected error fetching synthetic talent:', err)
     }
   }
 
   const handleGithubAnalysis = async () => {
     if (!githubUsername || !user) {
-      alert('Please enter your GitHub username')
+      setError('Please enter your GitHub username')
       return
     }
 
     setAnalyzing(true)
+    setError(null)
 
     try {
       const response = await fetch('/api/analyze-github', {
@@ -124,11 +137,11 @@ export default function DashboardPage() {
         setGithubUsername('')
         fetchSyntheticTalent() // Refresh synthetic talent data
       } else {
-        alert(`Error: ${result.error}`)
+        setError(result.error || 'Failed to analyze GitHub profile')
       }
     } catch (error) {
-      console.error('GitHub analysis error:', error)
-      alert('An error occurred during GitHub analysis')
+      console.error('Error analyzing GitHub:', error)
+      setError('Failed to analyze GitHub profile. Please try again.')
     } finally {
       setAnalyzing(false)
     }
@@ -140,7 +153,24 @@ export default function DashboardPage() {
   }
 
   if (!user) {
-    return <div>Loading...</div>
+    return <div className="min-h-screen flex items-center justify-center bg-gray-950 text-white">Loading...</div>
+  }
+
+  if (error) {
+    return (
+      <DashboardLayout title="Dashboard" subtitle="Error occurred">
+        <div className="bg-red-900 border border-red-800 text-red-200 px-4 py-3 rounded-lg">
+          <p className="font-medium">Error</p>
+          <p className="text-sm">{error}</p>
+          <button 
+            onClick={() => setError(null)}
+            className="mt-2 text-xs underline hover:no-underline"
+          >
+            Dismiss
+          </button>
+        </div>
+      </DashboardLayout>
+    )
   }
 
   // Real stats based on user data

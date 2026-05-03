@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
+import { ToastContainer, useToast } from './Toast'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -12,6 +13,7 @@ interface DashboardLayoutProps {
 
 export default function DashboardLayout({ children, title, subtitle }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const { toasts, removeToast } = useToast()
 
   return (
     <div className="min-h-screen bg-gray-950">
@@ -40,6 +42,9 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
           <DashboardSidebar />
         </div>
       </div>
+
+      {/* Toast notifications */}
+      <ToastContainer toasts={toasts} onClose={removeToast} />
     </div>
   )
 }
