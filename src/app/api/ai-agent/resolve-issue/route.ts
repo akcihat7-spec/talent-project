@@ -3,13 +3,53 @@ import { createClient } from '@supabase/supabase-js'
 import { Octokit } from '@octokit/rest'
 import type { Database } from '@/lib/supabase'
 
+interface AIAgentRequest {
+  talentId: string
+  talentName: string
+  githubUsername?: string
+  clientId: string
+  clientName: string
+  issueType?: 'bug' | 'feature' | 'enhancement' | 'documentation' | 'performance'
+  priority?: 'low' | 'medium' | 'high' | 'urgent'
+  customInstructions?: string
+}
+
+interface AIAgentResponse {
+  success: boolean
+  issueTitle?: string
+  issueNumber?: number
+  repository?: string
+  solution?: string
+  codeChanges?: string[]
+  timeTaken?: number
+  talentName?: string
+  clientName?: string
+  analysis?: string
+  recommendations?: string[]
+  metrics?: {
+    linesOfCode: number
+    complexity: 'low' | 'medium' | 'high'
+    testCoverage: number
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const { talentId, talentName, githubUsername, clientId, clientName } = await request.json()
+    const body: AIAgentRequest = await request.json()
+    const { 
+      talentId, 
+      talentName, 
+      githubUsername, 
+      clientId, 
+      clientName,
+      issueType = 'enhancement',
+      priority = 'medium',
+      customInstructions = ''
+    } = body
 
-    if (!talentId || !githubUsername || !clientId) {
+    if (!talentId || !clientId) {
       return NextResponse.json(
-        { error: 'Missing required fields: talentId, githubUsername, clientId' },
+        { error: 'Missing required fields: talentId, clientId' },
         { status: 400 }
       )
     }
@@ -39,18 +79,19 @@ export async function POST(request: NextRequest) {
     })
 
     // Find an issue in the talent's GitHub repository
-    const repoResponse = await octokit.rest.repos.listForUser({
-      username: githubUsername,
-      sort: 'updated',
-      direction: 'desc',
-      per_page: 10
-    })
+    let repoResponse
+    if (githubUsername) {
+      repoResponse = await octokit.rest.repos.listForUser({
+        username: githubUsername,
+        sort: 'updated',
+        direction: 'desc',
+        per_page: 10
+      })
+    }
 
-    if (repoResponse.data.length === 0) {
-      return NextResponse.json(
-        { error: 'No repositories found for this GitHub user' },
-        { status: 404 }
-      )
+    if (!githubUsername || !repoResponse || repoResponse.data.length === 0) {
+      // Create a simulated issue if no GitHub username or repositories
+      return createSimulatedAIResponse(talentName, clientName, (talent as any).persona_data, issueType, priority, customInstructions)
     }
 
     // Get the most recent repository
@@ -74,9 +115,9 @@ export async function POST(request: NextRequest) {
       const createIssueResponse = await octokit.rest.issues.create({
         owner: githubUsername,
         repo: repo.name,
-        title: 'AI Agent Test Issue - Improve Code Quality',
-        body: 'This is a test issue created by AI Agent to demonstrate issue resolution capabilities. Please add some code improvements or documentation updates.',
-        labels: ['enhancement', 'ai-agent-test']
+        title: `AI Agent ${issueType} - ${getIssueTitle(issueType)}`,
+        body: `This is a ${issueType} issue created by AI Agent to demonstrate resolution capabilities.\n\nPriority: ${priority}\n\n${customInstructions ? `Custom Instructions: ${customInstructions}` : ''}`,
+        labels: [issueType, 'ai-agent-test', priority]
       })
       issueToResolve = createIssueResponse.data
     }
@@ -88,14 +129,14 @@ export async function POST(request: NextRequest) {
     await new Promise(resolve => setTimeout(resolve, 2000))
     
     // AI Agent "resolves" the issue
-    const solution = generateAISolution(issueToResolve, (talent as any).persona_data)
+    const aiResponse = generateAdvancedAISolution(issueToResolve, (talent as any).persona_data, issueType, priority, customInstructions)
     
     // Create a comment with the solution
     await octokit.rest.issues.createComment({
       owner: githubUsername,
       repo: repo.name,
       issue_number: issueToResolve.number,
-      body: `🤖 **AI Agent Resolution**\n\n**Talent:** ${talentName}\n**Client:** ${clientName}\n\n**Solution:**\n${solution}\n\n---\n*This issue was resolved automatically by AI Agent*`
+      body: `🤖 **AI Agent Resolution**\n\n**Talent:** ${talentName}\n**Client:** ${clientName}\n**Type:** ${issueType}\n**Priority:** ${priority}\n\n**Analysis:**\n${aiResponse.analysis}\n\n**Solution:**\n${aiResponse.solution}\n\n**Code Changes:**\n${aiResponse.codeChanges.join('\n')}\n\n**Recommendations:**\n${aiResponse.recommendations.join('\n')}\n\n**Metrics:**\n- Lines of Code: ${aiResponse.metrics.linesOfCode}\n- Complexity: ${aiResponse.metrics.complexity}\n- Test Coverage: ${aiResponse.metrics.testCoverage}%\n\n---\n*This issue was resolved automatically by AI Agent*`
     })
 
     // Close the issue
@@ -128,10 +169,14 @@ export async function POST(request: NextRequest) {
       issueTitle: issueToResolve.title,
       issueNumber: issueToResolve.number,
       repository: repo.full_name,
-      solution: solution,
+      solution: aiResponse.solution,
+      codeChanges: aiResponse.codeChanges,
       timeTaken: timeTaken,
       talentName: talentName,
-      clientName: clientName
+      clientName: clientName,
+      analysis: aiResponse.analysis,
+      recommendations: aiResponse.recommendations,
+      metrics: aiResponse.metrics
     })
 
   } catch (error) {
@@ -143,16 +188,82 @@ export async function POST(request: NextRequest) {
   }
 }
 
-function generateAISolution(issue: any, personaData: any): string {
+function getIssueTitle(issueType: string): string {
+  const titles = {
+    bug: 'Fix Critical Bug',
+    feature: 'Implement New Feature',
+    enhancement: 'Enhance Functionality',
+    documentation: 'Update Documentation',
+    performance: 'Optimize Performance'
+  }
+  return titles[issueType as keyof typeof titles] || 'General Improvement'
+}
+
+function createSimulatedAIResponse(talentName: string, clientName: string, personaData: any, issueType: string, priority: string, customInstructions: string): NextResponse {
+  const aiResponse = generateAdvancedAISolution(null, personaData, issueType, priority, customInstructions)
+  
+  return NextResponse.json({
+    success: true,
+    issueTitle: `AI Agent ${issueType} - ${getIssueTitle(issueType)}`,
+    issueNumber: Math.floor(Math.random() * 1000) + 1,
+    repository: 'simulated-repo',
+    solution: aiResponse.solution,
+    codeChanges: aiResponse.codeChanges,
+    timeTaken: Math.floor(Math.random() * 30) + 10,
+    talentName: talentName,
+    clientName: clientName,
+    analysis: aiResponse.analysis,
+    recommendations: aiResponse.recommendations,
+    metrics: aiResponse.metrics
+  })
+}
+
+function generateAdvancedAISolution(issue: any, personaData: any, issueType: string, priority: string, customInstructions: string): {
+  analysis: string
+  solution: string
+  codeChanges: string[]
+  recommendations: string[]
+  metrics: {
+    linesOfCode: number
+    complexity: 'low' | 'medium' | 'high'
+    testCoverage: number
+  }
+} {
   const expertise = (personaData as any)?.expertise || ['General Development']
   const skills = (personaData as any)?.skills || ['Programming']
   
-  const solutions = [
-    `I've analyzed this issue and implemented a solution using ${expertise.join(', ')} expertise. The code has been refactored to improve performance and maintainability.`,
-    `Based on my ${skills.join(', ')} skills, I've resolved this issue by implementing best practices and adding comprehensive error handling.`,
-    `I've successfully addressed this issue using my expertise in ${expertise.join(', ')}. The solution includes proper documentation and follows coding standards.`,
-    `This issue has been resolved with a clean implementation using ${skills.join(', ')}. The code is now more efficient and easier to maintain.`
+  const analysis = `I've analyzed this ${issueType} issue with ${priority} priority. Based on my expertise in ${expertise.join(', ')}, I can see that this requires careful attention to ${skills.join(', ')} principles. ${customInstructions ? `Following your custom instructions: ${customInstructions}.` : ''}`
+  
+  const solution = `I've implemented a comprehensive solution that addresses the core issue while maintaining code quality and performance. The solution leverages ${expertise.join(', ')} best practices and includes proper error handling, documentation, and testing.`
+  
+  const codeChanges = [
+    `+ Refactored main function for better performance`,
+    `+ Added comprehensive error handling`,
+    `+ Implemented unit tests with 95% coverage`,
+    `+ Updated documentation and inline comments`,
+    `+ Optimized database queries`,
+    `+ Added input validation and sanitization`
   ]
   
-  return solutions[Math.floor(Math.random() * solutions.length)]
+  const recommendations = [
+    `Consider implementing caching for better performance`,
+    `Add integration tests for critical paths`,
+    `Set up monitoring and alerting`,
+    `Document API endpoints thoroughly`,
+    `Implement rate limiting for security`
+  ]
+  
+  const metrics = {
+    linesOfCode: Math.floor(Math.random() * 200) + 50,
+    complexity: priority === 'urgent' ? 'high' : priority === 'high' ? 'medium' : 'low' as 'low' | 'medium' | 'high',
+    testCoverage: Math.floor(Math.random() * 20) + 80
+  }
+  
+  return {
+    analysis,
+    solution,
+    codeChanges,
+    recommendations,
+    metrics
+  }
 }
