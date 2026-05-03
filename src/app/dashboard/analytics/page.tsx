@@ -119,10 +119,10 @@ export default function AnalyticsPage() {
             <button
               key={period}
               onClick={() => setSelectedPeriod(period)}
-              className={`px-4 py-2 rounded-md text-sm font-medium ${
+              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                 selectedPeriod === period
-                  ? 'bg-purple-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-800 text-gray-300 border border-gray-700 hover:bg-gray-700 hover:text-white'
               }`}
             >
               {period.charAt(0).toUpperCase() + period.slice(1)}
@@ -134,7 +134,7 @@ export default function AnalyticsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-8">
         {statsCards.map(stat => (
-          <div key={stat.title} className="bg-white overflow-hidden shadow rounded-lg">
+          <div key={stat.title} className="bg-gray-900 border border-gray-800 overflow-hidden shadow-lg rounded-lg">
             <div className="p-5">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
@@ -144,13 +144,13 @@ export default function AnalyticsPage() {
                 </div>
                 <div className="ml-5 w-0 flex-1">
                   <dl>
-                    <dt className="text-sm font-medium text-gray-500 truncate">{stat.title}</dt>
+                    <dt className="text-sm font-medium text-gray-400 truncate">{stat.title}</dt>
                     <dd className="flex items-baseline">
-                      <div className="text-2xl font-semibold text-gray-900">{stat.value}</div>
+                      <div className="text-2xl font-semibold text-white">{stat.value}</div>
                       {stat.change && (
                         <div
                           className={`ml-2 flex items-baseline text-sm font-semibold ${
-                            stat.changeType === 'increase' ? 'text-green-600' : 'text-red-600'
+                            stat.changeType === 'increase' ? 'text-green-400' : 'text-red-400'
                           }`}
                         >
                           {stat.changeType === 'increase' ? (
@@ -173,20 +173,20 @@ export default function AnalyticsPage() {
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
         {/* Earnings Chart */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Monthly Earnings</h3>
+        <div className="bg-gray-900 border border-gray-800 shadow-lg rounded-lg p-6">
+          <h3 className="text-lg font-medium text-white mb-4">Monthly Earnings</h3>
           <div className="space-y-4">
             <div className="flex items-end space-x-2 h-40">
               {data.monthlyData.map((month, index) => (
                 <div key={month.month} className="flex-1 flex flex-col items-center">
-                  <div className="w-full bg-purple-600 rounded-t-md" style={{ height: getBarHeight(month.earnings, maxEarnings) }}>
+                  <div className="w-full bg-blue-600 rounded-t-md" style={{ height: getBarHeight(month.earnings, maxEarnings) }}>
                     <div className="text-white text-xs text-center pt-1">${(month.earnings / 1000).toFixed(1)}k</div>
                   </div>
-                  <div className="text-xs text-gray-500 mt-2">{month.month}</div>
+                  <div className="text-xs text-gray-400 mt-2">{month.month}</div>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-gray-400">
               <span>Total: ${data.monthlyData.reduce((sum, m) => sum + m.earnings, 0).toLocaleString()}</span>
               <span>Average: ${Math.round(data.monthlyData.reduce((sum, m) => sum + m.earnings, 0) / data.monthlyData.length).toLocaleString()}</span>
             </div>
@@ -194,20 +194,20 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Projects Chart */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Monthly Projects</h3>
+        <div className="bg-gray-900 border border-gray-800 shadow-lg rounded-lg p-6">
+          <h3 className="text-lg font-medium text-white mb-4">Monthly Projects</h3>
           <div className="space-y-4">
             <div className="flex items-end space-x-2 h-40">
               {data.monthlyData.map((month, index) => (
                 <div key={month.month} className="flex-1 flex flex-col items-center">
-                  <div className="w-full bg-blue-600 rounded-t-md" style={{ height: getBarHeight(month.projects, maxProjects) }}>
+                  <div className="w-full bg-green-600 rounded-t-md" style={{ height: getBarHeight(month.projects, maxProjects) }}>
                     <div className="text-white text-xs text-center pt-1">{month.projects}</div>
                   </div>
-                  <div className="text-xs text-gray-500 mt-2">{month.month}</div>
+                  <div className="text-xs text-gray-400 mt-2">{month.month}</div>
                 </div>
               ))}
             </div>
-            <div className="flex justify-between text-sm text-gray-600">
+            <div className="flex justify-between text-sm text-gray-400">
               <span>Total: {data.monthlyData.reduce((sum, m) => sum + m.projects, 0)} projects</span>
               <span>Average: {(data.monthlyData.reduce((sum, m) => sum + m.projects, 0) / data.monthlyData.length).toFixed(1)} projects/month</span>
             </div>
@@ -218,28 +218,28 @@ export default function AnalyticsPage() {
       {/* Top Skills and Recent Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Top Skills */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Top Skills</h3>
+        <div className="bg-gray-900 border border-gray-800 shadow-lg rounded-lg p-6">
+          <h3 className="text-lg font-medium text-white mb-4">Top Skills</h3>
           <div className="space-y-4">
             {data.topSkills.map((skill, index) => (
               <div key={skill.skill} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <span className="text-purple-600 font-medium text-sm">{index + 1}</span>
+                  <div className="flex-shrink-0 w-8 h-8 bg-blue-900 rounded-full flex items-center justify-center">
+                    <span className="text-blue-400 font-medium text-sm">{index + 1}</span>
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{skill.skill}</p>
-                    <p className="text-xs text-gray-500">{skill.count} projects</p>
+                    <p className="text-sm font-medium text-white">{skill.skill}</p>
+                    <p className="text-xs text-gray-400">{skill.count} projects</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <div className="w-24 bg-gray-200 rounded-full h-2">
+                  <div className="w-24 bg-gray-700 rounded-full h-2">
                     <div
-                      className="bg-purple-600 h-2 rounded-full"
+                      className="bg-blue-600 h-2 rounded-full"
                       style={{ width: `${skill.percentage}%` }}
                     />
                   </div>
-                  <span className="text-sm text-gray-600 w-12 text-right">{skill.percentage}%</span>
+                  <span className="text-sm text-gray-400 w-12 text-right">{skill.percentage}%</span>
                 </div>
               </div>
             ))}
@@ -247,19 +247,19 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Recent Performance */}
-        <div className="bg-white shadow rounded-lg p-6">
-          <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Performance</h3>
+        <div className="bg-gray-900 border border-gray-800 shadow-lg rounded-lg p-6">
+          <h3 className="text-lg font-medium text-white mb-4">Recent Performance</h3>
           <div className="space-y-4">
             {data.recentPerformance.map((week, index) => (
-              <div key={week.week} className="border-b border-gray-200 pb-4 last:border-b-0">
+              <div key={week.week} className="border-b border-gray-700 pb-4 last:border-b-0">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-sm font-medium text-gray-900">{week.week}</h4>
+                  <h4 className="text-sm font-medium text-white">{week.week}</h4>
                   <div className="flex items-center space-x-1">
                     {[...Array(5)].map((_, i) => (
                       <svg
                         key={i}
                         className={`h-4 w-4 ${
-                          i < Math.floor(week.rating) ? 'text-yellow-400' : 'text-gray-300'
+                          i < Math.floor(week.rating) ? 'text-yellow-400' : 'text-gray-600'
                         }`}
                         fill="currentColor"
                         viewBox="0 0 20 20"
@@ -267,17 +267,17 @@ export default function AnalyticsPage() {
                         <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                       </svg>
                     ))}
-                    <span className="text-sm text-gray-600 ml-1">{week.rating}</span>
+                    <span className="text-sm text-gray-400 ml-1">{week.rating}</span>
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-500">Earnings:</span>
-                    <span className="ml-2 font-medium text-gray-900">${week.earnings}</span>
+                    <span className="text-gray-400">Earnings:</span>
+                    <span className="ml-2 font-medium text-white">${week.earnings}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Projects:</span>
-                    <span className="ml-2 font-medium text-gray-900">{week.projects}</span>
+                    <span className="text-gray-400">Projects:</span>
+                    <span className="ml-2 font-medium text-white">{week.projects}</span>
                   </div>
                 </div>
               </div>
@@ -287,28 +287,28 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Summary Stats */}
-      <div className="mt-8 bg-gradient-to-r from-purple-600 to-pink-600 rounded-lg p-6 text-white">
+      <div className="mt-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-lg p-6 text-white">
         <h3 className="text-lg font-medium mb-4">Performance Summary</h3>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div>
-            <p className="text-purple-100 text-sm">Best Month</p>
+            <p className="text-blue-100 text-sm">Best Month</p>
             <p className="text-2xl font-bold">June</p>
-            <p className="text-purple-100 text-sm">$5,800 earned</p>
+            <p className="text-blue-100 text-sm">$5,800 earned</p>
           </div>
           <div>
-            <p className="text-purple-100 text-sm">Average Project Value</p>
+            <p className="text-blue-100 text-sm">Average Project Value</p>
             <p className="text-2xl font-bold">${Math.round(data.totalEarnings / data.totalProjects)}</p>
-            <p className="text-purple-100 text-sm">Per project</p>
+            <p className="text-blue-100 text-sm">Per project</p>
           </div>
           <div>
-            <p className="text-purple-100 text-sm">Hourly Rate</p>
+            <p className="text-blue-100 text-sm">Hourly Rate</p>
             <p className="text-2xl font-bold">${Math.round(data.totalEarnings / data.totalHours)}</p>
-            <p className="text-purple-100 text-sm">Per hour</p>
+            <p className="text-blue-100 text-sm">Per hour</p>
           </div>
           <div>
-            <p className="text-purple-100 text-sm">Growth Rate</p>
+            <p className="text-blue-100 text-sm">Growth Rate</p>
             <p className="text-2xl font-bold">+23%</p>
-            <p className="text-purple-100 text-sm">vs last period</p>
+            <p className="text-blue-100 text-sm">vs last period</p>
           </div>
         </div>
       </div>
