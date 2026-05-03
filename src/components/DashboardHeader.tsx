@@ -3,6 +3,7 @@
 import { BellIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import { Bars3Icon } from '@heroicons/react/24/outline'
 import { UserButton } from '@clerk/nextjs'
+import NotificationsDropdown from './NotificationsDropdown'
 
 interface DashboardHeaderProps {
   setSidebarOpen: (open: boolean) => void
@@ -30,13 +31,7 @@ export default function DashboardHeader({ setSidebarOpen, title, subtitle }: Das
             {subtitle && <p className="text-sm text-gray-400">{subtitle}</p>}
           </div>
           <div className="flex items-center space-x-4">
-            <button
-              type="button"
-              className="p-2 text-gray-400 hover:text-white transition-colors"
-            >
-              <span className="sr-only">View notifications</span>
-              <BellIcon className="h-6 w-6" aria-hidden="true" />
-            </button>
+            <NotificationsDropdown />
             <div className="flex-shrink-0">
               <UserButton />
             </div>
@@ -64,14 +59,7 @@ export default function DashboardHeader({ setSidebarOpen, title, subtitle }: Das
                     <MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />
                   </div>
                 </div>
-                <button
-                  type="button"
-                  className="p-2 text-gray-400 hover:text-white transition-colors relative"
-                >
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-blue-500 rounded-full"></span>
-                </button>
+                <NotificationsDropdown />
                 <div className="flex-shrink-0">
                   <UserButton />
                 </div>
