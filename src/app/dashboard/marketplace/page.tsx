@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import DashboardLayout from '@/components/DashboardLayout'
+import { useAuth } from '@/contexts/AuthContext'
+import { createClient } from '@supabase/supabase-js'
+import type { Database } from '@/lib/supabase'
 import { 
   UserGroupIcon, 
   MagnifyingGlassIcon,
@@ -14,6 +17,27 @@ import {
   BriefcaseIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
+
+interface SyntheticTalent {
+  id: string
+  owner_id: string
+  persona_data: {
+    name?: string
+    title?: string
+    expertise?: string[]
+    description?: string
+    skills?: string[]
+    experience?: string
+    languages?: string[]
+    response_time?: string
+    github_username?: string
+    avatar_url?: string
+  }
+  daily_rate: number
+  status: 'active' | 'inactive' | 'pending'
+  created_at: string
+  updated_at: string
+}
 
 interface Talent {
   id: string
@@ -30,6 +54,8 @@ interface Talent {
   experience: string
   languages: string[]
   responseTime: string
+  ownerId: string
+  githubUsername?: string
 }
 
 const mockTalents: Talent[] = [
@@ -46,7 +72,8 @@ const mockTalents: Talent[] = [
     skills: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Redux'],
     experience: '5+ years',
     languages: ['English', 'Turkish'],
-    responseTime: '< 1 hour'
+    responseTime: '< 1 hour',
+    ownerId: 'demo-1'
   },
   {
     id: '2',
@@ -57,85 +84,204 @@ const mockTalents: Talent[] = [
     rating: 4.8,
     projects: 89,
     description: 'Specialized in Python automation, data analysis, and backend development. Created numerous automation solutions.',
-    status: 'available',
-    skills: ['Python', 'Django', 'FastAPI', 'Pandas', 'NumPy'],
+    status: 'busy',
+    skills: ['Python', 'Django', 'Flask', 'Pandas', 'NumPy'],
     experience: '4+ years',
-    languages: ['English', 'Spanish'],
-    responseTime: '< 2 hours'
+    languages: ['English', 'German'],
+    responseTime: '< 2 hours',
+    ownerId: 'demo-2'
   },
   {
     id: '3',
-    name: 'CloudArchitect AI',
-    title: 'DevOps & Cloud Architect',
-    expertise: ['AWS', 'Docker', 'Kubernetes'],
-    dailyRate: 350,
+    name: 'NodeJS Ninja AI',
+    title: 'Full Stack Node.js Developer',
+    expertise: ['Node.js', 'Express', 'MongoDB'],
+    dailyRate: 220,
     rating: 4.7,
     projects: 156,
-    description: 'Expert in cloud infrastructure, DevOps practices, and scalable system design. AWS certified solutions architect.',
-    status: 'busy',
-    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'CI/CD'],
-    experience: '7+ years',
-    languages: ['English'],
-    responseTime: '< 4 hours'
+    description: 'Full-stack developer with expertise in Node.js ecosystem. Built numerous RESTful APIs and real-time applications.',
+    status: 'available',
+    skills: ['Node.js', 'Express', 'MongoDB', 'React', 'Socket.io'],
+    experience: '6+ years',
+    languages: ['English', 'Spanish'],
+    responseTime: '< 1 hour',
+    ownerId: 'demo-3'
   },
   {
     id: '4',
-    name: 'MobileDev AI',
-    title: 'React Native Developer',
-    expertise: ['React Native', 'iOS', 'Android'],
+    name: 'MobileDev Pro AI',
+    title: 'Mobile App Developer',
+    expertise: ['React Native', 'Flutter', 'iOS'],
     dailyRate: 280,
-    rating: 4.6,
-    projects: 94,
-    description: 'Expert in mobile app development using React Native. Published multiple apps on App Store and Play Store.',
+    rating: 4.9,
+    projects: 73,
+    description: 'Expert in mobile app development for both iOS and Android. Created award-winning applications with millions of downloads.',
     status: 'available',
-    skills: ['React Native', 'TypeScript', 'Redux', 'Firebase'],
-    experience: '3+ years',
-    languages: ['English', 'French'],
-    responseTime: '< 1 hour'
+    skills: ['React Native', 'Flutter', 'Swift', 'Kotlin', 'Firebase'],
+    experience: '5+ years',
+    languages: ['English', 'French', 'Japanese'],
+    responseTime: '< 3 hours',
+    ownerId: 'demo-4'
   },
   {
     id: '5',
-    name: 'DataScience AI',
-    title: 'Machine Learning Engineer',
-    expertise: ['ML', 'TensorFlow', 'PyTorch'],
-    dailyRate: 400,
-    rating: 4.9,
-    projects: 67,
-    description: 'Specialized in machine learning, deep learning, and AI solutions. Experienced in computer vision and NLP.',
+    name: 'Cloud Architect AI',
+    title: 'Cloud Solutions Architect',
+    expertise: ['AWS', 'Docker', 'Kubernetes'],
+    dailyRate: 350,
+    rating: 4.8,
+    projects: 45,
+    description: 'Certified cloud architect with expertise in designing scalable cloud solutions. Led multiple enterprise migrations.',
     status: 'available',
-    skills: ['Python', 'TensorFlow', 'PyTorch', 'Scikit-learn', 'OpenCV'],
-    experience: '6+ years',
-    languages: ['English', 'German'],
-    responseTime: '< 3 hours'
+    skills: ['AWS', 'Docker', 'Kubernetes', 'Terraform', 'Azure'],
+    experience: '7+ years',
+    languages: ['English', 'Chinese'],
+    responseTime: '< 4 hours',
+    ownerId: 'demo-5'
   },
   {
     id: '6',
-    name: 'FullStack AI',
-    title: 'Full-Stack Developer',
-    expertise: ['Node.js', 'React', 'MongoDB'],
+    name: 'Data Scientist AI',
+    title: 'Machine Learning Engineer',
+    expertise: ['Machine Learning', 'Python', 'TensorFlow'],
     dailyRate: 320,
-    rating: 4.8,
-    projects: 203,
-    description: 'Full-stack developer with expertise in MERN stack and cloud deployment. Built numerous scalable applications.',
-    status: 'available',
-    skills: ['Node.js', 'React', 'MongoDB', 'Express', 'GraphQL'],
-    experience: '8+ years',
-    languages: ['English', 'Hindi'],
-    responseTime: '< 2 hours'
+    rating: 4.9,
+    projects: 62,
+    description: 'Machine learning engineer specializing in deep learning and computer vision. Published research papers in top conferences.',
+    status: 'busy',
+    skills: ['Python', 'TensorFlow', 'PyTorch', 'Scikit-learn', 'Keras'],
+    experience: '4+ years',
+    languages: ['English', 'Italian'],
+    responseTime: '< 2 hours',
+    ownerId: 'demo-6'
   }
 ]
 
 export default function MarketplacePage() {
-  const [talents, setTalents] = useState<Talent[]>(mockTalents)
-  const [filteredTalents, setFilteredTalents] = useState<Talent[]>(mockTalents)
+  const { user } = useAuth()
+  const [talents, setTalents] = useState<Talent[]>([])
+  const [filteredTalents, setFilteredTalents] = useState<Talent[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedSkills, setSelectedSkills] = useState<string[]>([])
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 500])
   const [sortBy, setSortBy] = useState<'rating' | 'price' | 'projects'>('rating')
+  const [showAIAgentModal, setShowAIAgentModal] = useState(false)
+  const [selectedTalent, setSelectedTalent] = useState<Talent | null>(null)
+  const [aiAgentStatus, setAiAgentStatus] = useState<'idle' | 'analyzing' | 'working' | 'completed'>('idle')
+  
+  const supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  )
+
+  useEffect(() => {
+    fetchTalents()
+  }, [])
+
+  const fetchTalents = async () => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('synthetic_talents')
+        .select('*')
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        console.error('Error fetching talents:', error)
+        // Fallback to mock data
+        setTalents(mockTalents)
+        setFilteredTalents(mockTalents)
+      } else if (data && data.length > 0) {
+        // Transform synthetic talents to talent format
+        const transformedTalents: Talent[] = data.map((st: SyntheticTalent) => ({
+          id: st.id,
+          name: st.persona_data?.name || 'AI Talent',
+          title: st.persona_data?.title || 'AI Developer',
+          expertise: st.persona_data?.expertise || [],
+          dailyRate: st.daily_rate,
+          rating: 4.5 + Math.random() * 0.5, // Random rating between 4.5-5.0
+          projects: Math.floor(Math.random() * 100) + 20, // Random projects between 20-120
+          description: st.persona_data?.description || 'AI-powered talent with advanced capabilities.',
+          status: st.status === 'active' ? 'available' : 'offline',
+          skills: st.persona_data?.skills || [],
+          experience: st.persona_data?.experience || '3+ years',
+          languages: st.persona_data?.languages || ['English'],
+          responseTime: st.persona_data?.response_time || '< 2 hours',
+          ownerId: st.owner_id,
+          githubUsername: st.persona_data?.github_username,
+          avatar: st.persona_data?.avatar_url
+        }))
+
+        setTalents(transformedTalents)
+        setFilteredTalents(transformedTalents)
+      } else {
+        // No data in database, use mock data
+        setTalents(mockTalents)
+        setFilteredTalents(mockTalents)
+      }
+    } catch (error) {
+      console.error('Error fetching talents:', error)
+      // Fallback to mock data
+      setTalents(mockTalents)
+      setFilteredTalents(mockTalents)
+    } finally {
+      setLoading(false)
+    }
+  }
   const [favorites, setFavorites] = useState<string[]>([])
   const [showFilters, setShowFilters] = useState(false)
 
   const allSkills = Array.from(new Set(mockTalents.flatMap(t => t.skills))).sort()
+
+  const handleHireNow = async (talent: Talent) => {
+    if (!user) {
+      alert('Please sign in to hire talent')
+      return
+    }
+
+    setSelectedTalent(talent)
+    setShowAIAgentModal(true)
+    setAiAgentStatus('analyzing')
+  }
+
+  const startAIAgentWorkflow = async () => {
+    if (!selectedTalent || !user) return
+
+    try {
+      setAiAgentStatus('working')
+      
+      // Call AI Agent API to resolve GitHub issue
+      const response = await fetch('/api/ai-agent/resolve-issue', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          talentId: selectedTalent.id,
+          talentName: selectedTalent.name,
+          githubUsername: selectedTalent.githubUsername,
+          clientId: user.id,
+          clientName: user.email
+        })
+      })
+
+      const result = await response.json()
+
+      if (response.ok) {
+        setAiAgentStatus('completed')
+        // Show success message with issue resolution details
+        alert(`AI Agent successfully resolved issue!\n\nIssue: ${result.issueTitle}\nSolution: ${result.solution}\nTime taken: ${result.timeTaken} minutes`)
+      } else {
+        throw new Error(result.error || 'Failed to resolve issue')
+      }
+    } catch (error) {
+      console.error('AI Agent error:', error)
+      setAiAgentStatus('idle')
+      alert('Failed to start AI Agent. Please try again.')
+    }
+  }
 
   useEffect(() => {
     let filtered = talents
@@ -427,7 +573,10 @@ export default function MarketplacePage() {
 
               {/* Action Buttons */}
               <div className="mt-6 flex space-x-3">
-                <button className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md text-sm">
+                <button 
+                  onClick={() => handleHireNow(talent)}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-md text-sm"
+                >
                   Hire Now
                 </button>
                 <button className="flex-1 border border-purple-600 text-purple-600 hover:bg-purple-50 font-medium py-2 px-4 rounded-md text-sm">
@@ -447,6 +596,89 @@ export default function MarketplacePage() {
           <p className="mt-1 text-sm text-gray-500">
             Try adjusting your search or filters
           </p>
+        </div>
+      )}
+
+      {/* AI Agent Modal */}
+      {showAIAgentModal && selectedTalent && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <h3 className="text-lg leading-6 font-medium text-gray-900">
+                AI Agent İş Akışı Başlatılıyor
+              </h3>
+              <div className="mt-4">
+                <div className="bg-purple-50 border border-purple-200 p-4 rounded-lg">
+                  <div className="flex items-center mb-3">
+                    <div className="w-12 h-12 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold">
+                      {selectedTalent.name.charAt(0)}
+                    </div>
+                    <div className="ml-3">
+                      <h4 className="font-medium text-gray-900">{selectedTalent.name}</h4>
+                      <p className="text-sm text-gray-500">{selectedTalent.title}</p>
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-700">
+                    AI Agent, {selectedTalent.name} yeteneklerini kullanarak GitHub reposundaki bir issue'yu çözmek için çalışacak.
+                  </p>
+                </div>
+
+                {/* AI Agent Status */}
+                <div className="mt-4 space-y-3">
+                  {aiAgentStatus === 'analyzing' && (
+                    <div className="flex items-center text-blue-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600 mr-2"></div>
+                      <span className="text-sm">AI Agent analiz ediyor...</span>
+                    </div>
+                  )}
+                  
+                  {aiAgentStatus === 'working' && (
+                    <div className="flex items-center text-purple-600">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-purple-600 mr-2"></div>
+                      <span className="text-sm">AI Agent issue çözüyor...</span>
+                    </div>
+                  )}
+                  
+                  {aiAgentStatus === 'completed' && (
+                    <div className="flex items-center text-green-600">
+                      <CheckCircleIcon className="h-4 w-4 mr-2" />
+                      <span className="text-sm">Issue başarıyla çözüldü!</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* GitHub Info */}
+                {selectedTalent.githubUsername && (
+                  <div className="mt-4 p-3 bg-gray-50 rounded-lg">
+                    <p className="text-sm text-gray-600">
+                      <span className="font-medium">GitHub:</span> {selectedTalent.githubUsername}
+                    </p>
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-6 flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowAIAgentModal(false)
+                    setSelectedTalent(null)
+                    setAiAgentStatus('idle')
+                  }}
+                  className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md"
+                  disabled={aiAgentStatus === 'working'}
+                >
+                  İptal
+                </button>
+                <button
+                  onClick={startAIAgentWorkflow}
+                  disabled={aiAgentStatus !== 'analyzing'}
+                  className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {aiAgentStatus === 'analyzing' ? 'Başlatılıyor...' : 'AI Agent Başlat'}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
       )}
     </DashboardLayout>
